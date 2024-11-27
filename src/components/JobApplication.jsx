@@ -12,6 +12,20 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+import { Amplify } from 'aws-amplify';
+import outputs from '/amplify_outputs.json';
+import { generateClient } from 'aws-amplify/data';
+import { uploadData } from 'aws-amplify/storage';
+
+Amplify.configure(outputs);
+/**
+ * @type {import('aws-amplify/data').Client<import('../../amplify/data/resource').Schema>}
+ */
+const client = generateClient({
+    authMode: 'userPool',
+});
+console.log("Client models:", client.models);
+console.log("Application model:", client.models.Applications);
 
 function JobApplication() {
     const location = useLocation();
@@ -48,22 +62,37 @@ function JobApplication() {
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Save the application to local storage
-        const existingApplications = JSON.parse(localStorage.getItem('applications')) || [];
-        const newApplication = {
-            title: job.title,
-            description: job.description,
-            status: 'Submitted',
-            ...formData,
-            resume: formData.resume ? formData.resume.name : null, // Save file name only for simplicity
-        };
-        localStorage.setItem('applications', JSON.stringify([...existingApplications, newApplication]));
+        try {
+            // Create the Application record in AWS
+            const applicationData = {
+                jobTitle: job.title || '',
+                description: job.description || '',
+                name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                reason: formData.reason,
+                resumeFileName: formData.resume ? formData.resume.name : null,
+            };
 
-        // Redirect to Applications page
-        navigate('/applications');
+            const { data: newApplication } = await client.models.Applications.create(applicationData);
+
+            if (formData.resume) {
+                // Upload the resume file to S3
+                await uploadData({
+                    path: ({ identityId }) => `resumes/${identityId}/${formData.resume.name}`,
+                    data: formData.resume,
+                }).result;
+            }
+
+            // Redirect to Applications page
+            navigate('/applications');
+        } catch (error) {
+            console.error('Error submitting application:', error);
+            // Handle error (e.g., show a notification to the user)
+        }
     };
 
     const triggerFileInput = () => {
@@ -71,7 +100,11 @@ function JobApplication() {
     };
 
     const handleExit = () => {
-        setExitDialogOpen(true); // Open the confirmation dialog
+        if (unsavedChanges) {
+            setExitDialogOpen(true); // Open the confirmation dialog
+        } else {
+            navigate('/jobs'); // No unsaved changes, proceed to exit
+        }
     };
 
     const confirmExit = () => {
@@ -143,6 +176,7 @@ function JobApplication() {
                     </Button>
                     <input
                         id="resume-upload"
+                        name="resume"
                         type="file"
                         accept=".pdf,.doc,.docx"
                         onChange={handleFileChange}

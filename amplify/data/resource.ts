@@ -8,7 +8,7 @@ and "delete" any "Todo" records.
 =========================================================================*/
 
 const schema = a.schema({
-  Application: a
+  Applications: a
     .model({
       jobTitle: a.string(),
       description: a.string(),

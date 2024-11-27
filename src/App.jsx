@@ -6,9 +6,10 @@ import Typography from '@mui/material/Typography';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Jobs from './components/Jobs';
+import JobsAuth from './components/JobsAuth';
 import JobApplication from './components/JobApplication';
 import Applications from './components/Applications';
+import { Authenticator } from '@aws-amplify/ui-react';
 
 function App() {
   const [value, setValue] = React.useState(0);
@@ -16,6 +17,7 @@ function App() {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
 
   return (
     <Router>
@@ -44,13 +46,26 @@ function App() {
             path="/"
             element={<Typography variant="h4" sx={{ textAlign: 'center', mt: 4 }}>Welcome Home</Typography>}
           />
-          <Route path="/jobs" element={<Jobs />} />
-          <Route path="/apply" element={<JobApplication />} />
-          <Route path="/applications" element={<Applications />} />
+          <Route
+            path="/apply"
+            element={
+              <Authenticator>
+                <JobApplication />
+              </Authenticator>
+            }
+          />
+          <Route
+            path="/applications"
+            element={
+              <Authenticator>
+                <Applications />
+              </Authenticator>
+            }
+          />
+          <Route path="/jobs" element={<JobsAuth />} />
         </Routes>
       </div>
     </Router>
   );
 }
-
 export default App;

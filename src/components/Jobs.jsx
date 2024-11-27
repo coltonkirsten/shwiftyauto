@@ -8,6 +8,7 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import Grid from '@mui/material/Grid';
+import { useAuthenticator } from '@aws-amplify/ui-react';
 
 const jobs = [
     {
@@ -25,6 +26,7 @@ const jobs = [
 ];
 
 function Jobs() {
+    const { signOut } = useAuthenticator();
     const navigate = useNavigate();
 
     const handleApplyClick = (job) => {
@@ -37,20 +39,22 @@ function Jobs() {
 
     return (
         <Container>
-            <Box sx={{ textAlign: 'center', mt: 4, mb: 4 }}>
-                <Typography variant="h2" component="h1" gutterBottom>
-                    Jobs at Shwifty Automotive
-                </Typography>
-                <Typography variant="h6" component="p" gutterBottom>
-                    Join our team of skilled professionals and help us revolutionize vehicle repair!
-                </Typography>
+            <Box sx={{ textAlign: 'right', mt: 4, mb: 4 }}>
                 <Button
                     variant="outlined"
                     color="secondary"
-                    sx={{ mt: 2 }}
+                    sx={{ mt: 2, margin: 1 }}
                     onClick={handleViewApplications}
                 >
                     View Your Applications
+                </Button>
+                <Button
+                    variant="outlined"
+                    color="secondary"
+                    sx={{ mt: 2, margin: 1 }}
+                    onClick={signOut}
+                >
+                    Sign out
                 </Button>
             </Box>
             <Grid container spacing={4}>
@@ -80,6 +84,7 @@ function Jobs() {
                 ))}
             </Grid>
         </Container>
+
     );
 }
 

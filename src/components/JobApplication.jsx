@@ -12,12 +12,9 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-import { Amplify } from 'aws-amplify';
-import outputs from '/amplify_outputs.json';
 import { generateClient } from 'aws-amplify/data';
 import { uploadData } from 'aws-amplify/storage';
 
-Amplify.configure(outputs);
 /**
  * @type {import('aws-amplify/data').Client<import('../../amplify/data/resource').Schema>}
  */
